@@ -1,0 +1,217 @@
+﻿@model TestOneDrive.Models.Product.ProductRegister
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<partial name="_Notification" />
+<h4 class="text-center" style="color:#f39c12">PRODUCT INFORMATION</h4>
+
+
+
+
+<div class="class=" container"">
+    <div class="row mt-6">
+        <div class="col-12 offset-0 border border-primary rounded " style="background-color:gainsboro">
+
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="ProductCode" class="control-label"></label>
+                            <input asp-for="ProductCode" class="form-control" />
+                            <span asp-validation-for="ProductCode" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="CustomerName" class="control-label"></label>
+                            <input asp-for="CustomerName" class="form-control" />
+                            <span asp-validation-for="CustomerName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="CustomerEmail" class="control-label"></label>
+                            <input asp-for="CustomerEmail" class="form-control" />
+                            <span asp-validation-for="CustomerEmail" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="CustomerPhone" class="control-label"></label>
+                            <input asp-for="CustomerPhone" class="form-control" />
+                            <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="ProductName" class="control-label"></label>
+                            <input asp-for="ProductName" class="form-control" />
+                            <span asp-validation-for="ProductName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="ProductDescription" class="control-label"></label>
+                            <input asp-for="ProductDescription" class="form-control" />
+                            <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="ProductCategory" class="control-label"></label>
+                            <input asp-for="ProductCategory" class="form-control" />
+                            <span asp-validation-for="ProductCategory" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="Price" class="control-label"></label>
+                            <input asp-for="Price" class="form-control" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="ManufucturingDate" class="control-label"></label>
+                            <input asp-for="ManufucturingDate" class="form-control" />
+                            <span asp-validation-for="ManufucturingDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <div class="form-group">
+                            <label style="color:green" asp-for="ExpireDate" class="control-label"></label>
+                            <input asp-for="ExpireDate" class="form-control" />
+                            <span asp-validation-for="ExpireDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-6">
+                    <div class=" col-12 offset-0 border border-primary rounded  " style="background-color:gainsboro">
+                        <h4 class="text-center" style="color:blueviolet">ADDRESS</h4>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label style="color:green">Country</label>
+                                        <select asp-for="Country" class="form-control" id="Country">
+                                            <option>--Select Country--</option>
+                                        </select>
+
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label style="color:green">State</label>
+                                        <select asp-for="State" class="form-control" id="State">
+                                            <option>--Select State--</option>
+                                        </select>
+
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label style="color:green">City</label>
+                                        <select asp-for="City" class="form-control" id="City">
+                                            <option>--Select City--</option>
+                                        </select>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <label style="color:green" asp-for="Addess1" class="control-label"></label>
+                                        <input asp-for="Addess1" class="form-control" />
+                                        <span asp-validation-for="Addess1" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label style="color:green" asp-for="Addess2" class="control-label"></label>
+                                            <input asp-for="Addess2" class="form-control" />
+                                            <span asp-validation-for="Addess2" class="text-danger"></span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group">
+                                        <div class="form-group">
+                                            <label style="color:green" asp-for="Landmark" class="control-label"></label>
+                                            <input asp-for="Landmark" class="form-control" />
+                                            <span asp-validation-for="Landmark" class="text-danger"></span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row mt-6">
+                    <div class=" col-12 offset-0 border border-primary rounded  " style="background-color:gainsboro">
+                        <h4 class="text-center" style="color:blueviolet">DOCUMENTS</h4>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-5">
+                                    <div class="form-group">
+                                        <label style="color:green" asp-for="ImageName"></label>
+                                        <input type="text" asp-for="ImageName" class="form-control" placeholder="Enter ImageName" />
+                                        <span class="alert-danger" asp-validation-for="ImageName"></span>
+
+                                    </div>
+                                </div>
+                                <div class="col-5">
+                                    <div class="form-group">
+                                        <label style="color:green" asp-for="ImagePath"></label>
+                                        <input type="file" asp-for="ImagePath" class="form-control" />
+                                        <span class="alert-danger" asp-validation-for="ImagePath"></span>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+
+                <div class="row" style="background-color:paleturquoise">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <input type="submit" value="CONTINUE" asp-action="Create" class=" btn btn-info " />
+                            <input type="submit" value="BACK" asp-action="Index" class="btn btn-primary" />
+                            @*<input type="submit" value="UPLOAD" asp-action="UploadImage" class="btn btn-primary float-right" />*@
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+
+            </form>
+
+        </div>
+    </div>
+</div>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+
+<script src="~/js/casecadett.js"></script>
+
+

@@ -1,0 +1,126 @@
+﻿@model IEnumerable<TestOneDrive.Models.Product.ProductRegister>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@if (TempData["success"] != null)
+{
+    <h2>@TempData["success"]</h2>
+}
+<div>
+    
+    <div class="row mt-5">
+        <div class="col-12" style="text-align:center !important; color:#f39c12"><h4>PRODUCT</h4></div>
+    </div>
+    <div class="row mt-2">
+        <div class="text-left">
+
+            <br />
+            <a class="text-light btn btn-success font-weight-bold" asp-action="Create" asp-controller="Product">NEW PRODUCT</a>
+
+        </div>
+        <div class="col-10   text-right">
+
+
+            <form asp-controller="Product" asp-action="Index">
+                
+                
+                <span class="btn-group">
+                    
+                    <input class="form-control" type="text" name="SearchText" />
+                    <input class="p-1 ml-2 btn btn-sm btn-info" type="submit" value="Search" />
+                    <input class="p-1 ml-2 btn btn-sm btn-info" type="submit" value="BACK" asp-action="Index" asp-controller="Product" />
+
+                </span>
+
+            </form>
+        </div>
+        <br />
+        <br />
+        <br />
+
+
+        <div>
+            <table class="table table-hover " style="background-color:lightsteelblue">
+                <thead>
+                    <tr style="background-color:lightcyan">
+
+                        <th style="color:darkslategrey">ID</th>
+                        <th style="color:darkslategrey">PRODUCT CODE</th>
+                        <th style="color:darkslategrey">PRODUCT NAME</th>
+                        <th style="color:darkslategrey">CUSTOMER NAME</th>
+                        <th style="color:darkslategrey">CUSTOMER EMAIL</th>
+                        <th style="color:darkslategrey">CUSTOMER MOBILE</th>
+                        <th style="color:darkslategrey">PRODUCT NAME</th>
+                        <th style="color:darkslategrey">DESCRIPTION</th>
+                        <th style="color:darkslategrey">CATEGORY</th>
+                        <th style="color:darkslategrey">PRICE</th>
+                        <th style="color:darkslategrey">MANU.DATE</th>
+                        <th style="color:darkslategrey">EXP.DATE</th>
+                        <th style="color:darkslategrey">COUNTRY</th>
+                        <th style="color:darkslategrey">STATE</th>
+                        <th style="color:darkslategrey">CITY</th>
+                        <th style="color:darkslategrey">ADDRESS1</th>
+                        <th style="color:darkslategrey">ADDRESS1</th>
+                        <th style="color:darkslategrey">LANDMARK</th>
+                        <th style="color:darkslategrey;width:50px!important">DOCUMENT NAME</th>
+                        <th style="color:darkslategrey; width:20px ">IMAGE PATH</th>
+                        <th style="color:dodgerblue">UPDATE</th>
+                        <th style="color:red">DELETE</th>
+
+
+
+
+
+
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.ProductId</td>
+                            <td>@item.ProductCode</td>
+                            <td>@item.ProductName</td>
+                            <td>@item.CustomerName</td>
+                            <td>@item.CustomerEmail</td>
+                            <td>@item.CustomerPhone</td>
+                            <td>@item.ProductName</td>
+                            <td>@item.ProductDescription</td>
+                            <td>@item.ProductCategory</td>
+                            <td>@item.Price</td>
+                            <td>@item.ManufucturingDate</td>
+                            <td>@item.ExpireDate</td>
+                            <td>@item.Country</td>
+                            <td>@item.State</td>
+                            <td>@item.City</td>
+                            <td>@item.Addess1</td>
+                            <td>@item.Addess2</td>
+                            <td>@item.Landmark</td>
+                            <td>@item.ImageName</td>
+                            <td>@item.ImagePath</td>
+
+
+
+
+                            <td>
+                                <a class="btn btn-primary" asp-action="Edit" asp-route-id="@item.ProductId">UPDATE</a>
+                            </td>
+
+                            <td>
+                                <a class=" btn btn-danger" asp-controller="Product" asp-action="Delete" asp-route-id="@item.ProductId">DELETE</a>
+                            </td>
+
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+

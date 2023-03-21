@@ -1,0 +1,48 @@
+﻿@model IEnumerable<TestOneDrive.Models.Product.ProductRegister>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid" style="width:100%">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                @*<div class="text-left">
+                    <a class="text-light btn btn-success font-weight-bold" asp-action="Create" asp-controller="Product">NEW PRODUCT</a>
+
+                </div>*@
+                <h4 class="card-title text-center" style="color:darkred">PRODUCT</h4>
+
+                <div>
+                    <table class="table table-hover " style="background-color:lightsteelblue">
+                        <thead>
+                            <tr style="background-color:darkgrey">
+
+                                <th style="color:darkslategrey">ID</th>
+                                <th style="color:darkslategrey">CODE</th>
+                                <th style="color:darkslategrey">NAME</th>
+                                <th style="color:darkslategrey">DESCRIPTION</th>
+                                <th style="color:darkslategrey">CATEGORY</th>
+                                <th style="color:darkslategrey">PRICE</th>
+                                <th style="color:darkslategrey">MANU.DATE</th>
+                                <th style="color:darkslategrey">EXP.DATE</th>
+                                <th style="color:dodgerblue">UPDATE</th>
+                                <th style="color:red">DELETE</th>
+
+
+
+
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="table_data"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/js/custom.js"></script>

@@ -1,0 +1,386 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using EWireless.Server.Models;
+using EWireless.Shared;
+using EWireless.Server.Data;
+using Microsoft.Extensions.Options;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Cors;
+
+namespace EWireless.Server.Controllers
+{
+    [Route("[controller]/[action]")] //Enable for production
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        //private readonly UserManager<ApplicationUser> _userManager;
+        //private readonly SignInManager<ApplicationUser> _signInManager;
+
+        //private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
+        private readonly IConfigurationSection _jwtSettings;
+
+        private readonly ApplicationDBContext _dbContext;
+        private readonly IOptions<SMTPOptions> _smtpSettings;
+        //private readonly ILogger _logger;
+        //private readonly IOptions<JwtOptions> _jwtSettings;
+
+        public AuthController(ApplicationDBContext context, IOptions<SMTPOptions> smtpOptions, IConfiguration configuration)
+        {
+            _dbContext = context;
+            //_userManager = userManager;
+            //_signInManager = signInManager;
+            _smtpSettings = smtpOptions;
+
+            //_userManager = userManager;
+            _configuration = configuration;
+            _jwtSettings = _configuration.GetSection("JwtSettings");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(LoginModel parameters)
+        {
+            //var user = new ApplicationUser();
+            //user.UserName = parameters.UserName;
+            //var result = await _userManager.CreateAsync(user, parameters.Password);
+            //if (!result.Succeeded) return BadRequest(result.Errors.FirstOrDefault()?.Description);
+            return await Login(new LoginModel
+            {
+                UserName = parameters.UserName,
+                Password = parameters.Password
+            });
+        }
+
+        //[DisableCors]
+        [HttpPost]
+        //[HttpGet, Route("Login/{id}")]
+        public async Task<JsonResult> Login(LoginModel request)
+        {
+            Console.WriteLine("Reached to AuthController for Login");
+
+            try
+            {
+                var userData = _dbContext.User.FirstOrDefault(user => user.UserEmail == request.UserName && user.IsActive == true && user.IsDeleted == false);
+                //var userData = _dbContext.User.FirstOrDefault(user => user.UserEmail == request.UserName);
+
+                //---------------------------start temporary use----------------------------------------//
+                //List<UserModel> lstUsers = TempUserlist();
+                //var userData = lstUsers.FirstOrDefault(user => user.UserEmail == request.UserName && user.InActive == false && user.IsDeleted == false);
+                //---------------------------end temporary use----------------------------------------//
+
+                if (userData == null)
+                {
+                    //return new JsonResult(new ErrorModel(null, "User not found")) { StatusCode = 404 };
+                    return new JsonResult(new ErrorModel(null, "User not found"));
+                }
+
+                if (!userData.CheckPassword(request.Password))
+                {
+                    return new JsonResult(new ErrorModel(null, "User not found"));
+                }
+                else
+                {
+                    var signingCredentials = GetSigningCredentials();
+                    var claims = GetClaims(userData);
+                    var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
+                    var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+                    //return Ok(new AuthResponseDto { IsAuthSuccessful = true, Token = token });
+                    //return Ok();
+
+                    return new JsonResult(new ErrorModel(token, string.Empty)) { StatusCode = 200 };
+                    //return new JsonResult(new ErrorModel("Login successfully!",token)) { StatusCode = 200 };
+                    //return new JsonResult(new AuthResponseDto { IsAuthSuccessful = true, Token = token }) { StatusCode = 200 };
+                    //return new JsonResult(new ErrorModel(new AuthResponseDto { IsAuthSuccessful = true, Token = token })) { StatusCode = 200 };
+                }
+
+                //return Ok();
+                //return new JsonResult(new ErrorModel(userData));
+                //return new JsonResult(new ErrorModel(null, "User not found"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Auth Controller: " + ex.Message);
+                //await ErrorLog("AuthController-Login", ex.Message);
+                //return new StatusCodeResult(500);
+            }
+
+            return new JsonResult(new ErrorModel(null, "User not found"));
+        }
+
+        [HttpPost]
+        public async Task<UserModel> GetUsers(UserModel user)
+        {
+            UserModel userData = new UserModel();
+
+            try
+            {
+                userData = _dbContext.User.FirstOrDefault(u => u.UserId == user.UserId);
+
+                if (userData != null)
+                {
+                    userData.IsSuccessful = true;
+                }
+
+
+                return userData;
+
+            }
+            catch (Exception ex)
+            {
+                userData = new UserModel();
+                await ErrorLog("AuthController-GetUser", ex.Message, string.Empty, user.UserId);
+                return userData;
+            }
+        }
+
+        [HttpPost]
+        public async Task<bool> AddUpdateUser(UserModel model)
+        {
+            bool result = false;
+
+            try
+            {
+
+                var userData = _dbContext.User.FirstOrDefault(user => user.UserEmail == model.UserEmail && user.UserId == model.UserId);
+
+                if (userData != null)
+                {
+                    userData.FName = model.FName;
+                    userData.MName = model.MName;
+                    userData.LName = model.LName;
+                    userData.Gender = model.Gender;
+                    userData.Phone = model.Phone;
+                    userData.DOB = model.DOB;
+                    userData.DateUpdated = DateTime.Now;
+                    userData.IsActive = model.IsActive;
+                }
+                else
+                {
+                    string pwd = PasswordStrengthCheck.GeneratePassword(true, true, true, true, 8);
+
+                    model.UserId = 0;
+                    model.UserType = UserModel.UserTypeEnum.Operator;
+                    model.PasswordHash = EWireless.Shared.Utility.HashPassword(pwd);
+                    model.DateCreated = DateTime.Now;
+                    model.DateUpdated = DateTime.Now;
+                    _dbContext.User.Add(model);
+                }
+
+                _dbContext.SaveChanges();
+
+                result = true;
+
+            }
+            catch (Exception ex)
+            {
+                result = false;
+                await ErrorLog("AuthController-AddUpdateUser", ex.Message);
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<bool> ChangePassword(ChangePasswordDto model)
+        {
+            bool result = false;
+
+            try
+            {
+
+                var userData = _dbContext.User.FirstOrDefault(user => user.UserEmail == model.UserName && user.UserId == model.UserId);
+
+                if (userData != null && userData.CheckPassword(model.CurrentPassword))
+                {
+                    userData.PasswordHash = EWireless.Shared.Utility.HashPassword(model.NewPassword);
+                }
+                else
+                {
+                    result = false;
+                    return result;
+                }
+
+                _dbContext.SaveChanges();
+
+                result = true;
+
+            }
+            catch (Exception ex)
+            {
+                result = false;
+                await ErrorLog("AuthController-AddUpdateUser", ex.Message);
+            }
+
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<UserModel> GetUser(UserModel user)
+        {
+            UserModel userData = new UserModel();
+
+            try
+            {
+                userData = _dbContext.User.FirstOrDefault(u => u.UserId == user.UserId);
+
+                if (userData != null)
+                {
+                    userData.IsSuccessful = true;
+                }
+
+
+                return userData;
+
+            }
+            catch (Exception ex)
+            {
+                userData = new UserModel();
+                await ErrorLog("AuthController-GetUser", ex.Message, string.Empty, user.UserId);
+                return userData;
+            }
+        }
+
+        private SigningCredentials GetSigningCredentials()
+        {
+            var key = Encoding.UTF8.GetBytes(_jwtSettings["securityKey"]);
+            var secret = new SymmetricSecurityKey(key);
+
+            return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
+        }
+        private List<Claim> GetClaims(UserModel userInfo)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.PrimarySid, userInfo.UserId.ToString()),
+                new Claim(ClaimTypes.Sid, userInfo.UserEmail),
+                new Claim(ClaimTypes.Role, userInfo.UserType.ToString()),
+                new Claim(ClaimTypes.Name, userInfo.FName)
+            };
+
+            return claims;
+        }
+        private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
+        {
+            var tokenOptions = new JwtSecurityToken(
+                issuer: _jwtSettings["validIssuer"],
+                audience: _jwtSettings["validAudience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtSettings["expiryInMinutes"])),
+                signingCredentials: signingCredentials);
+
+            return tokenOptions;
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ForgetPassword(LoginModel loginRequest)
+        {
+            try
+            {
+                var userData = _dbContext.User.FirstOrDefault(user => user.UserEmail == loginRequest.UserName && user.IsActive == true && user.IsDeleted == false);
+
+                if (userData == null)
+                {
+                    return new JsonResult(new ErrorModel(null, "User not found"));
+                }
+                else
+                {
+                    string pwd = PasswordStrengthCheck.GeneratePassword(true, true, true, true, 8);
+
+                    userData.PasswordHash = EWireless.Shared.Utility.HashPassword(pwd);
+                    _dbContext.SaveChanges();
+
+                    EWireless.Shared.Utility.SendMail("Password Recovery", $"Your password is: {pwd}", new string[] { userData.UserEmail }, _smtpSettings);
+
+                    //user.PasswordHash = Utility.HashPassword(pwd); 
+
+                    return new JsonResult(new ErrorModel("Password send successfully!")) { StatusCode = 200 };
+                }
+            }
+            catch (Exception ex)
+            {
+                await ErrorLog("AuthController-ForgetPassword", ex.Message);
+            }
+
+            return new JsonResult(new ErrorModel(null, "User not found"));
+        }
+
+        [HttpGet]
+        public CurrentUserModel CurrentUserInfo()
+        {
+            return new CurrentUserModel
+            {
+                IsAuthenticated = User.Identity.IsAuthenticated,
+                UserName = User.Identity.Name,
+                Claims = User.Claims
+                .ToDictionary(c => c.Type, c => c.Value)
+            };
+        }
+
+        //[Authorize]
+        [HttpPost]
+        public async Task<IActionResult> Logout()
+        {
+            //await _signInManager.SignOutAsync();
+            return Ok();
+        }
+
+        private async Task ErrorLog(string ErrorType, string ErrorMsg, string Username = "", int UserId = 0)
+        {
+            //ErrorController err = new ErrorController(_dbContext, _userManager, _signInManager, _smtpSettings);
+            ErrorController err = new ErrorController(_dbContext, _smtpSettings, _configuration);
+            ErrorLogModel ErrorModel = new ErrorLogModel();
+            ErrorModel.ErrorType = ErrorType;
+            ErrorModel.ErrorDetail = ErrorMsg;
+            await err.AddError(ErrorModel);
+        }
+
+        public List<UserModel> TempUserlist()
+        {
+            List<UserModel> lstUsers = new List<UserModel>();
+            UserModel oUser = new UserModel();
+
+            oUser.UserId = 1;
+            oUser.UserType = UserModel.UserTypeEnum.Administrator;
+            oUser.UserEmail = "sshiva@pisoftek.com";
+            oUser.PasswordHash = "sshiva";
+            oUser.FName = "sShiva";
+            oUser.MName = "Nand";
+            oUser.LName = "Suman";
+            oUser.IsActive = false;
+            oUser.IsDeleted = false;
+            oUser.DateCreated = DateTime.Now;
+            oUser.DateUpdated = DateTime.Now;
+
+            lstUsers.Add(oUser);
+
+            return lstUsers;
+        }
+
+        private static readonly string[] Summaries = new[]
+        {
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
+
+        [HttpGet]
+        public IEnumerable<WeatherForecast> GetMyData()
+        {
+            var rng = new Random();
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            {
+                Date = DateTime.Now.AddDays(index),
+                TemperatureC = rng.Next(-20, 55),
+                Summary = Summaries[rng.Next(Summaries.Length)]
+            })
+            .ToArray();
+        }
+    }
+}

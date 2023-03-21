@@ -1,0 +1,46 @@
+﻿@model IEnumerable<TestOneDrive.Models.Account.Account>
+@{
+    ViewData["Title"] = "Users";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title text-center" style="color:darkred">USERS</h4>
+
+                <div class="table-responsive">
+                    <table class="table table-hover " style="background-color:lightsteelblue">
+                        <thead>
+                            <tr style="background-color:darkgrey">
+
+                                <th style="color:crimson"> USER NAME </th>
+                                <th style="color:crimson"> EMAIL  </th>
+                                <th style="color:crimson"> MOBILE NUMBER </th>
+                                <th style="color:crimson"> PASSWORD </th>
+                                <th style="color:crimson"> ACTIVE </th>
+
+
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Username</td>
+                                    <td>@item.Email</td>
+                                    <td>@item.MobileNumber</td>
+                                    <td>@item.Password</td>
+                                    <td>@item.IsActive</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
